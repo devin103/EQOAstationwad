@@ -31,7 +31,7 @@ if(debug):
 print("Please enter IP Address")
 print("Formating considerations: *xxx.xxx.xxx.xxx*")
 NewIP = input("Enter here: ")
-print(len(NewIP))
+
 NewIPLen = len(NewIP) + 7
 
 
@@ -44,7 +44,6 @@ except:
   quit()
 
 print("Adding IP: {} To file".format(NewIP))
-print("")
 
 #Open station.wad
 f = open('station.wad', 'rb')
@@ -189,4 +188,4 @@ os.remove('./patch/eqoa/eqahosts.txt')
 if(debug):
   print("Done zipping files")
 
-print("Remember to change the stationNew.wad to station.wad before using in patches or on memory cards...")
+print("Folder structure and files created...")
