@@ -1,7 +1,7 @@
 # EQOAstationwad
 
 This file asks for an ip address input, and parses the station.wad file for EQOA Frontiers and replaces all the ip addresses, using the proper format needed. 
-This can allow server's to patch over this file to client's and direct them to the appropriate account login server.
-This utilizes python 3 built in libraries, so should be fairly simple to use.
+Additionally, added the creation of the eqahoosts.txt file, proper folder/file structure and dynamically make the xml file.
+Lastly, the files are gzip'd and old files deleted.
 
-A new file is generated, stationNew.wad, which would need to be changed to station.wad before attempting to pack it into a ps2 memory card or patching it to client's.
+This is designed to be ran and essentially plug and play to handle patching files to clients

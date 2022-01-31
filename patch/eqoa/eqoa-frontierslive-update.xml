@@ -1,0 +1,12 @@
+<VerantPatcher Version="1.0">
+	<Product Name="EverQuest Online Adventures: Frontiers Live" Server="patch.everquestonlineadventures.com" Port="7000" UseCRC="true" GzPath="/m2/http-docs/patch/eqoa/frontierslive" AccessPath="patch/eqoa/frontierslive" Version="38">
+		<Distribution Name="Frontiers Live Distribution" Title="EQOA Frontiers Live Patch Files" FilePath="/m2/http-docs/patch/eqoa-release/frontierslive" GzPath="/m2/http-docs/patch/eqoa/frontierslive">
+			<Directory LocalPath="::HomeDirectory::" Name="." RemotePath="patch/eqoa/frontierslive">
+				<Directory Name="BASLUS-20744EQONLINE">
+					<File LocalName="eqahosts.txt" TimeStamp="2003:12:13: 3: 7:37" Name="eqahosts.txt.gz" TotalSize=20 DownloadSize=20 CRC= 837072830/>
+					<File LocalName="station.wad" TimeStamp="2003:12:13: 3: 7:37" Name="station.wad.gz" TotalSize=334501 DownloadSize=334501 CRC=3397463943/>
+				</Directory>
+			</Directory>
+		</Distribution>
+	</Product>
+</VerantPatcher>

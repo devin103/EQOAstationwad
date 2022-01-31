@@ -1,5 +1,32 @@
 import struct as struct
 import ipaddress
+import zlib
+import os
+import gzip
+import shutil
+
+debug = False
+def crc(fileName):
+    prev = 0
+    for eachLine in open(fileName,"rb"):
+        prev = zlib.crc32(eachLine, prev)
+    return (prev & 0xFFFFFFFF)
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print ('Error: Creating directory. ' +  directory)
+        
+if(debug):
+  print('Creating Patch folders')
+createFolder('./patch/eqoa/')
+createFolder('./patch/web/eqoa/motd/')
+if(debug):
+  print('Created...')
+if(debug):
+  print("Creating station.wad and eqahost.txt")
 
 print("Please enter IP Address")
 print("Formating considerations: *xxx.xxx.xxx.xxx*")
@@ -21,7 +48,7 @@ print("")
 
 #Open station.wad
 f = open('station.wad', 'rb')
-fnew = open('stationNew.wad', 'wb+')
+fnew = open('./patch/eqoa/station.wad', 'wb+')
 
 #Write the first 76 bytes to the new File
 fnew.write(f.read(76))
@@ -35,10 +62,10 @@ for i in range(4):
   #Get first file offset
   FileOffset = struct.unpack('<L', f.read(4))[0]
   FileLength = struct.unpack('<L', f.read(4))[0]
-
-  print("Offset data is at: {}".format(hex(offset)))
-  print("File Offset is at: {}".format(hex(FileOffset)))
-  print("File Length is: {}".format(FileLength))
+  if(debug):
+    print("Offset data is at: {}".format(hex(offset)))
+    print("File Offset is at: {}".format(hex(FileOffset)))
+    print("File Length is: {}".format(FileLength))
 
   f.seek(FileOffset)
   
@@ -60,7 +87,8 @@ for i in range(4):
 
     #This is the string we are looking for
     if string == b'stationdata/servers/stationLiveHosts.txt':
-      print("Found Station Hosts File...")
+      if(debug):
+        print("Found Station Hosts File...")
       break
     
     else:
@@ -106,15 +134,59 @@ for i in range(4):
   fnew.seek(0x10 * (i + 1))
   offSet = FileOffset + (i * (NewIPLen - ipLen))
   fnew.write(struct.pack('<L', offSet))
-  print("Writing offset: {}".format(hex(offSet)))
+  if(debug):
+    print("Writing offset: {}".format(hex(offSet)))
 
   #Write new file length
   fileLength = FileLength + (NewIPLen - ipLen)
   fnew.write(struct.pack('<L', fileLength))
-  print("Writing file length: {}".format(fileLength))
-  print("")
+  if(debug):
+    print("Writing file length: {}".format(fileLength))
+    print("")
 
 f.close()
 fnew.close()
-print("Done...")
-input("Remember to change the stationNew.wad to station.wad before using in patches or on memory cards...")
+
+#Create eqahosts.txt
+fnew = open('./patch/eqoa/eqahosts.txt', 'w+')
+fnew.write(NewIP+":10070")
+fnew.close()
+
+# Creates a folder in the current directory called data
+if(debug):
+  print("Done...") 
+
+if(debug):
+  print("Creating xml file")
+fxml = open('./patch/eqoa/eqoa-frontierslive-update.xml', 'w+')
+fxml.write("<VerantPatcher Version=\"1.0\">\n")
+fxml.write("\t<Product Name=\"EverQuest Online Adventures: Frontiers Live\" Server=\"patch.everquestonlineadventures.com\" Port=\"7000\" UseCRC=\"true\" GzPath=\"/m2/http-docs/patch/eqoa/frontierslive\" AccessPath=\"patch/eqoa/frontierslive\" Version=\"38\">\n")
+fxml.write("\t\t<Distribution Name=\"Frontiers Live Distribution\" Title=\"EQOA Frontiers Live Patch Files\" FilePath=\"/m2/http-docs/patch/eqoa-release/frontierslive\" GzPath=\"/m2/http-docs/patch/eqoa/frontierslive\">\n")
+fxml.write("\t\t\t<Directory LocalPath=\"::HomeDirectory::\" Name=\".\" RemotePath=\"patch/eqoa/frontierslive\">\n")
+fxml.write("\t\t\t\t<Directory Name=\"BASLUS-20744EQONLINE\">\n")
+fxml.write("\t\t\t\t\t<File LocalName=\"eqahosts.txt\" TimeStamp=\"2003:12:13: 3: 7:37\" Name=\"eqahosts.txt.gz\" TotalSize={} DownloadSize={} CRC= {}/>\n".format(os.path.getsize('./patch/eqoa/eqahosts.txt'), os.path.getsize('./patch/eqoa/eqahosts.txt'), crc('./patch/eqoa/eqahosts.txt')))
+fxml.write("\t\t\t\t\t<File LocalName=\"station.wad\" TimeStamp=\"2003:12:13: 3: 7:37\" Name=\"station.wad.gz\" TotalSize={} DownloadSize={} CRC={}/>\n".format(os.path.getsize('./patch/eqoa/station.wad'), os.path.getsize('./patch/eqoa/station.wad'), crc('./patch/eqoa/station.wad')))
+fxml.write("\t\t\t\t</Directory>\n")
+fxml.write("\t\t\t</Directory>\n")
+fxml.write("\t\t</Distribution>\n")
+fxml.write("\t</Product>\n")
+fxml.write("</VerantPatcher>\n")
+fxml.close()
+if(debug):
+  print("Xml created.")
+  print("Zipping files")
+with open('./patch/eqoa/station.wad', 'rb') as f_in:
+    with gzip.open('./patch/eqoa/station.wad.gz', 'wb') as f_out:
+        shutil.copyfileobj(f_in, f_out)
+with open('./patch/eqoa/eqahosts.txt', 'rb') as f_in:
+    with gzip.open('./patch/eqoa/eqahosts.txt.gz', 'wb') as f_out:
+        shutil.copyfileobj(f_in, f_out)
+        
+#Remove old files
+os.remove('./patch/eqoa/station.wad')
+os.remove('./patch/eqoa/eqahosts.txt')
+
+if(debug):
+  print("Done zipping files")
+
+print("Remember to change the stationNew.wad to station.wad before using in patches or on memory cards...")
